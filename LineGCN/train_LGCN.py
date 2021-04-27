@@ -14,7 +14,8 @@ for i in range(20):
     cor=0
     acc=0
     for [g,pmpd,label] in train_set:
-        predict=model(g,pmpd)
+        lg = g.line_graph(backtracking=False)
+        predict=model(g,lg,pmpd)
         reverse_label=1-label
         loss=min(cross_entropy(predict,torch.tensor(label)),cross_entropy(predict,torch.tensor(reverse_label)))
         loss.backward()

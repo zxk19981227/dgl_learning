@@ -11,7 +11,8 @@ class layer(Module):
         with g.local_scope():
             g.ndata['h']=hidden
             g.update_all(gcn_msg,gcn_sum)#这里认为只需要对临界节点求和即可，因为没有采取attention机制，接下来进行线性变换就可以了
-        return self.linear(g.ndata['h'])
+            h=g.ndata['h']
+            return self.linear(h)
 
 class GCN(Module):
     def __init__(self):
@@ -21,5 +22,5 @@ class GCN(Module):
         self.relu=ReLU()
     def forward(self,hidden,g):
         hidden=self.relu(self.layer(hidden,g))
-        hidden=self.layer(hidden,g)
+        hidden=self.layer2(hidden,g)
         return hidden

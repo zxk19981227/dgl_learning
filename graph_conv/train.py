@@ -13,16 +13,19 @@ def train(model:GCN,optim,loss_function,train_mask,g,label,features,step):
     loss.backward()
     optim.step()
     optim.zero_grad()
-    accuracy=(predict[train_mask]==label[train_mask]).sum().item/(train_mask.shape[0])
+    predict=torch.argmax(predict,-1)
+    accuracy=(predict[train_mask]==label[train_mask]).sum().item()/(train_mask.sum().item())
     print("training epoch {} loss {} accuracy {} ".format(step,loss.item(),accuracy))
 def eval(model:GCN,loss_function,test_mask,g,label,features,step):
     model.eval()
     with torch.no_grad():
         predict=model(features,g)
         loss=loss_function(predict[test_mask],label[test_mask])
-        accuracy=(predict[test_mask]==label[test_mask]).sum().item/(test_mask.shape[0])
-        print("training epoch {} loss {} accuracy {} ".format(step,loss.item(),accuracy))
-device="cuda:0"
+        predict = torch.argmax(predict, -1)
+        accuracy=(predict[test_mask]==label[test_mask]).sum().item()/(test_mask.sum().item())
+        print("eval epoch {} loss {} accuracy {} ".format(step,loss.item(),accuracy))
+# device="cuda:0"
+device='cpu'
 g=g.to(device)
 features=features.to(device)
 train_mask=train_mask.to(device)
@@ -32,5 +35,5 @@ optim=torch.optim.Adam(model.parameters(),lr=1e-2)
 loss_function=torch.nn.CrossEntropyLoss()
 for i in range(50):
     train(model,optim,loss_function,train_mask,g,label,features,i)
-    eval(model,optim,loss_function,test_mask,g,label,features,i)
+    eval(model,loss_function,test_mask,g,label,features,i)
 
